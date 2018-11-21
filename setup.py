@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 
 def get_package_info():
-    with open("setup.json", 'r') as fp:
+    with open(path.join(path.dirname(__file__), "setup.json"), 'r') as fp:
         cfg = json.load(fp)
     return cfg["package_info"]
 
@@ -32,7 +32,7 @@ def get_data_files():
 
 
 def get_entry_points():
-    with open("setup.json") as fp:
+    with open(path.join(path.dirname(__file__), "setup.json"), 'r') as fp:
         cfg = json.load(fp)
     return cfg.get("entry_points", {})
 
