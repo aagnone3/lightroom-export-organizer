@@ -3,6 +3,7 @@ import shutil
 import structlog
 from os import path
 from glob import glob
+import numpy as np
 from argparse import ArgumentParser
 
 log = structlog.getLogger()
@@ -88,10 +89,11 @@ def do(dir_base):
 
     # report any invalid pairs
     if len(fns_invalid) > 0:
-        log.error("{} invalid file pairs detected.".format(fns_invalid))
-        os.mkdir(dir_unknowns)
+        log.error("{} invalid file pairs detected.".format(len(fns_invalid)))
+        if not path.isdir(dir_unknowns):
+            os.mkdir(dir_unknowns)
 
-    for fn in fns_valid:
+    for fn in np.unique(fns_valid):
         keyword = read_keyword(fn + ".txt")
 
         if keyword:
@@ -100,23 +102,24 @@ def do(dir_base):
             # if this is a new keyword, create its directory
             if keyword not in keywords:
                 log.msg("New keyword found: {}. Creating directory".format(keyword))
-                os.mkdir(dir_keyword)
+                if not path.isdir(dir_keyword):
+                    os.mkdir(dir_keyword)
                 dirs_created.append(dir_keyword)
-                keywords |= set(keyword)
+                keywords.add(keyword)
 
             # move the file into the keyword directory
             log.msg("Moving {} to {}.".format(fn, dir_keyword))
-            for file_to_move in glob(fn + '*'):
+            for file_to_move in glob(fn + '.*'):
                 shutil.move(file_to_move, dir_keyword)
             os.remove(path.join(dir_keyword, path.basename(fn) + ".txt"))
         else:
             # keyword not successfully found -- add to unknowns
-            for file_to_move in glob(fn + '*'):
-                shutil.move(file_to_move, dir_unknowns)
+            for file_to_move in glob(fn + '.*'):
+                shutil.move(file_to_move, path.join(dir_unknowns, path.basename(fn)))
 
     for fn in fns_invalid:
         log.msg("Moving {} to {}.".format(fn, dir_unknowns))
-        for file_to_move in glob(fn + '*'):
+        for file_to_move in glob(fn + '.*'):
             shutil.move(file_to_move, dir_unknowns)
 
     # remove any empty directories that the file movement creates
