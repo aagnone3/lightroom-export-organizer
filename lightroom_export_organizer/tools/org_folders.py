@@ -9,11 +9,10 @@ import os
 import sys
 import structlog
 from os import path
-from glob import glob
 from argparse import ArgumentParser
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog
 
-from lightroom_export_organizer.org_folders import do, undo
+from lightroom_export_organizer.org_folders import do2
 
 log = structlog.getLogger()
 
@@ -53,7 +52,7 @@ def main():
         app = QApplication(sys.argv)
         args.input_directory = UI().get_directory()
 
-    return do(args.input_directory)
+    return do2(args.input_directory)
 
 
 if __name__ == '__main__':
